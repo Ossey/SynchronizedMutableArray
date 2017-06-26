@@ -134,9 +134,9 @@
 
 - (void)enumerateObjectsUsingBlock:(void (^)(id _Nonnull, NSUInteger, BOOL * _Nonnull))block {
     if (!block) return;
-//    [self treadSafetyListEnumerateWithBlock:^{
+    [self treadSafetyListEnumerateWithBlock:^{
         [_list enumerateObjectsUsingBlock:block];
-//    }];
+    }];
 }
 
 - (void)enumerateObjectsWithOptions:(NSEnumerationOptions)opts usingBlock:(void (^)(id _Nonnull, NSUInteger, BOOL * _Nonnull))block {
