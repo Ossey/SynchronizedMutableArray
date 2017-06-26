@@ -70,10 +70,6 @@
 				188A78FE1EFFF83300DF6D5A /* SynchronizedMutableArray */,
 				188A78EC1EFFF81C00DF6D5A /* Sample */,
 				188A78F11EFFF81C00DF6D5A /* SuspensionControl */,
-				188A78DE1EFFF7E800DF6D5A /* Main.storyboard */,
-				188A78E11EFFF7E800DF6D5A /* Assets.xcassets */,
-				188A78E31EFFF7E800DF6D5A /* LaunchScreen.storyboard */,
-				188A78E61EFFF7E800DF6D5A /* Info.plist */,
 				188A78D51EFFF7E800DF6D5A /* Supporting Files */,
 			);
 			path = SynchronizedMutableArray;
@@ -82,6 +78,10 @@
 		188A78D51EFFF7E800DF6D5A /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				188A78DE1EFFF7E800DF6D5A /* Main.storyboard */,
+				188A78E11EFFF7E800DF6D5A /* Assets.xcassets */,
+				188A78E31EFFF7E800DF6D5A /* LaunchScreen.storyboard */,
+				188A78E61EFFF7E800DF6D5A /* Info.plist */,
 				188A78D61EFFF7E800DF6D5A /* main.m */,
 			);
 			name = "Supporting Files";

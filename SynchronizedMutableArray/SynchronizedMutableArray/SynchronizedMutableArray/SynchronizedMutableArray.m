@@ -8,10 +8,18 @@
 
 #import "SynchronizedMutableArray.h"
 
+/*
+ * 通过OC的消息转发机制，实现一个同步执行的数组，将SynchronizedMutableArray中未实现的方法转发给NSMutableArray执行，且创建的对象会在同一线程下同步执行
+ * 目的是为了防止多线程并发操作数组引发的crash，解决线程安全问题
+ * 经测试此数组的操作速度是NSMutableArray的60%，非高并发操作，不建议使用
+ */
+
+
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementatio"
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
+
 
 @implementation SynchronizedMutableArray
 
@@ -61,7 +69,7 @@
 
 - (NSUInteger)count {
     __block NSUInteger count = 0;
-
+    
     [self treadSafetyListPerformSelectorWithBlock:^{
         count = [_list count];
     }];
@@ -117,23 +125,33 @@
 
 - (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id  _Nullable __unsafe_unretained [])buffer count:(NSUInteger)len {
     
-    NSUInteger idx = [_list countByEnumeratingWithState:state objects:buffer count:len];
+    __block NSUInteger idx = 0;
+    [self treadSafetyListEnumerateWithBlock:^{
+        idx = [_list countByEnumeratingWithState:state objects:buffer count:len];
+    }];
     return idx;
 }
 
 - (void)enumerateObjectsUsingBlock:(void (^)(id _Nonnull, NSUInteger, BOOL * _Nonnull))block {
     if (!block) return;
-    [_list enumerateObjectsUsingBlock:block];
+//    [self treadSafetyListEnumerateWithBlock:^{
+        [_list enumerateObjectsUsingBlock:block];
+//    }];
 }
 
 - (void)enumerateObjectsWithOptions:(NSEnumerationOptions)opts usingBlock:(void (^)(id _Nonnull, NSUInteger, BOOL * _Nonnull))block {
     if (!block) return;
-    [_list enumerateObjectsWithOptions:opts usingBlock:block];
+    [self treadSafetyListEnumerateWithBlock:^{
+        [_list enumerateObjectsWithOptions:opts usingBlock:block];
+    }];
 }
 
 - (void)enumerateObjectsAtIndexes:(NSIndexSet *)s options:(NSEnumerationOptions)opts usingBlock:(void (^)(id _Nonnull, NSUInteger, BOOL * _Nonnull))block {
     if (!block) return;
-    [_list enumerateObjectsAtIndexes:s options:opts usingBlock:block];
+    [self treadSafetyListEnumerateWithBlock:^{
+        [_list enumerateObjectsAtIndexes:s options:opts usingBlock:block];
+    }];
+    
 }
 
 #pragma mark *** NSCopying, NSMutableCopying ***
@@ -160,7 +178,7 @@
 }
 
 - (BOOL)synchronized {
-    return NO;
+    return YES;
 }
 
 @end
@@ -173,3 +191,5 @@
 }
 
 @end
+
+

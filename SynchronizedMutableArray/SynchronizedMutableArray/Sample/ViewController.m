@@ -35,16 +35,14 @@
             NSNumber *idx = @(i);
             [_array1 addObject:idx];
         }
-    
+        
     }
     NSDate* Start = [NSDate date];
     _array2 = [_array1 mutableCopy];
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         [_array2 enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSLog(@"%ld", idx);
-//            @autoreleasepool {
-                [_array1 removeLastObject];
-//            }
+            [_array1 removeLastObject];
             
             
         }];
@@ -53,6 +51,15 @@
         double deltaTime = [[NSDate date] timeIntervalSinceDate:Start];
         NSLog(@"＊＊＊＊＊＊cost time = %f", deltaTime);
         
+    });
+    
+    dispatch_async(dispatch_queue_create("123", DISPATCH_QUEUE_CONCURRENT), ^{
+        [_array2 enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSLog(@"%ld", idx);
+            [_array1 addObject:@(idx)];
+            
+            
+        }];
     });
 }
 

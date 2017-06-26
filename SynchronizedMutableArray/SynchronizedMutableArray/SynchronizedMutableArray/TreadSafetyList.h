@@ -8,8 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface TreadSafetyList : NSObject {
-@protected
     id _list;
     dispatch_queue_t _dispatchQueue;
 }
@@ -17,6 +18,11 @@
 @property (nonatomic) id list;
 @property (readonly) BOOL synchronized;
 
-- (void)treadSafetyListPerformSelectorWithBlock:(void (^)())block;
+/// 执行数组增删改查的队列
+- (void)treadSafetyListPerformSelectorWithBlock:(dispatch_block_t)block;
+/// 执行数组遍历的队列
+- (void)treadSafetyListEnumerateWithBlock:(dispatch_block_t)block;
 
 @end
+
+NS_ASSUME_NONNULL_END
