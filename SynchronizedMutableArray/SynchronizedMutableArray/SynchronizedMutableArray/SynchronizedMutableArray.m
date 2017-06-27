@@ -21,18 +21,6 @@
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-@interface TreadSafetyQueue ()
-
-/// 对数组执行增删改查的同步队列
-@property (nonatomic, strong) dispatch_queue_t dispatchQueue;
-/// 数组的遍历方法也要在同步队列中执行，当外界在多个异步队列中执行同一数组的遍历，进行增删改查时，同样会造成线程安全问题，引发crash
-/// 但是数组的遍历方法不能和增删改查的方法在同一队列，因为都是同步执行的，会造成死锁的，所以新开一个队列
-@property (nonatomic, strong) dispatch_queue_t enumerateQueue;
-@property (nonatomic, strong) dispatch_semaphore_t enumerateLockSemaphore;
-@property (nonatomic, strong) dispatch_semaphore_t syncLockSemaphore;
-
-@end
-
 @implementation SynchronizedMutableArray
 
 
