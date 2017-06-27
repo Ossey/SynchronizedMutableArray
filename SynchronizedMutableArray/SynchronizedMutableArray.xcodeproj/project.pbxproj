@@ -15,7 +15,6 @@
 		188A78FA1EFFF81C00DF6D5A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 188A78F01EFFF81C00DF6D5A /* ViewController.m */; };
 		188A78FB1EFFF81C00DF6D5A /* SuspensionControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 188A78F31EFFF81C00DF6D5A /* SuspensionControl.m */; };
 		188A79031EFFF83300DF6D5A /* SynchronizedMutableArray.m in Sources */ = {isa = PBXBuildFile; fileRef = 188A79001EFFF83300DF6D5A /* SynchronizedMutableArray.m */; };
-		188A79041EFFF83300DF6D5A /* TreadSafetyList.m in Sources */ = {isa = PBXBuildFile; fileRef = 188A79021EFFF83300DF6D5A /* TreadSafetyList.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,8 +32,6 @@
 		188A78F31EFFF81C00DF6D5A /* SuspensionControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SuspensionControl.m; sourceTree = "<group>"; };
 		188A78FF1EFFF83300DF6D5A /* SynchronizedMutableArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SynchronizedMutableArray.h; sourceTree = "<group>"; };
 		188A79001EFFF83300DF6D5A /* SynchronizedMutableArray.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SynchronizedMutableArray.m; sourceTree = "<group>"; };
-		188A79011EFFF83300DF6D5A /* TreadSafetyList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TreadSafetyList.h; sourceTree = "<group>"; };
-		188A79021EFFF83300DF6D5A /* TreadSafetyList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TreadSafetyList.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,8 +109,6 @@
 			children = (
 				188A78FF1EFFF83300DF6D5A /* SynchronizedMutableArray.h */,
 				188A79001EFFF83300DF6D5A /* SynchronizedMutableArray.m */,
-				188A79011EFFF83300DF6D5A /* TreadSafetyList.h */,
-				188A79021EFFF83300DF6D5A /* TreadSafetyList.m */,
 			);
 			path = SynchronizedMutableArray;
 			sourceTree = "<group>";
@@ -191,7 +186,6 @@
 			files = (
 				188A78FA1EFFF81C00DF6D5A /* ViewController.m in Sources */,
 				188A78F91EFFF81C00DF6D5A /* AppDelegate.m in Sources */,
-				188A79041EFFF83300DF6D5A /* TreadSafetyList.m in Sources */,
 				188A79031EFFF83300DF6D5A /* SynchronizedMutableArray.m in Sources */,
 				188A78FB1EFFF81C00DF6D5A /* SuspensionControl.m in Sources */,
 				188A78D71EFFF7E800DF6D5A /* main.m in Sources */,
@@ -351,6 +345,7 @@
 				188A78EB1EFFF7E800DF6D5A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

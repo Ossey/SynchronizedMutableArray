@@ -6,23 +6,34 @@
 //  Copyright © 2017年 Ossey. All rights reserved.
 //
 
-#import "TreadSafetyList.h"
+#import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
+@interface TreadSafetyQueue : NSObject {
+    id _list;
+    dispatch_queue_t _dispatchQueue;
+}
 
-@interface SynchronizedMutableArray<__covariant ObjectType>  : TreadSafetyList<NSCopying, NSMutableCopying, NSFastEnumeration, NSSecureCoding>
+@property (nonatomic) id list;
+@property (readonly) BOOL synchronized;
+
+/// 执行数组增删改查的队列
+- (void)performBlockOnTreadSafetyQueue:(dispatch_block_t)block;
+/// 执行数组遍历的队列
+- (void)enumerateUsingBlockOnTreadSafetyQueue:(dispatch_block_t)block;
+
+@end
+
+@interface SynchronizedMutableArray<__covariant ObjectType>  : TreadSafetyQueue<NSCopying, NSMutableCopying, NSFastEnumeration, NSSecureCoding>
 
 @property (readonly) NSUInteger count;
 
 - (ObjectType)objectAtIndex:(NSUInteger)index;
 - (void)addObject:(ObjectType)anObject;
-/// 在指定索引处插入一个元素，原来的元素后移
 - (void)insertObject:(ObjectType)anObject atIndex:(NSUInteger)index;
 - (void)removeLastObject;
-/// 删除对应索引位置/范围的元素（索引/范围必须有效
 - (void)removeObjectAtIndex:(NSUInteger)index;
-/// 替换对应索引位置的元素（索引必须有效
 - (void)replaceObjectAtIndex:(NSUInteger)index withObject:(ObjectType)anObject;
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
 - (instancetype)initWithCapacity:(NSUInteger)numItems NS_DESIGNATED_INITIALIZER;
@@ -34,7 +45,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SynchronizedMutableArray<ObjectType> (ExtendedArray)
 
-/// 在当前数组追加元素或数组，并返回新数组对象
 - (NSArray<ObjectType> *)arrayByAddingObject:(ObjectType)anObject;
 - (NSArray<ObjectType> *)arrayByAddingObjectsFromArray:(NSArray<ObjectType> *)otherArray;
 - (NSString *)componentsJoinedByString:(NSString *)separator;
@@ -43,7 +53,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly, copy) NSString *description;
 - (NSString *)descriptionWithLocale:(nullable id)locale;
 - (NSString *)descriptionWithLocale:(nullable id)locale indent:(NSUInteger)level;
-/// 查找与给定数组中第一个相同的对象（按值）
 - (nullable ObjectType)firstObjectCommonWithArray:(NSArray<ObjectType> *)otherArray;
 - (NSUInteger)indexOfObject:(ObjectType)anObject;
 - (NSUInteger)indexOfObject:(ObjectType)anObject inRange:(NSRange)range;
@@ -121,7 +130,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SynchronizedMutableArray<ObjectType> (ExtendedMutableArray)
 
 - (void)addObjectsFromArray:(NSArray<ObjectType> *)otherArray;
-/// 交换对应索引位置的元素（索引必须有效）
 - (void)exchangeObjectAtIndex:(NSUInteger)idx1 withObjectAtIndex:(NSUInteger)idx2;
 - (void)removeAllObjects;
 - (void)removeObject:(ObjectType)anObject inRange:(NSRange)range;
@@ -133,19 +141,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)removeObjectsInRange:(NSRange)range;
 - (void)replaceObjectsInRange:(NSRange)range withObjectsFromArray:(NSArray<ObjectType> *)otherArray range:(NSRange)otherRange;
 - (void)replaceObjectsInRange:(NSRange)range withObjectsFromArray:(NSArray<ObjectType> *)otherArray;
-/// 等效于先removeAllObjects后addObjectsFromArray
 - (void)setArray:(NSArray<ObjectType> *)otherArray;
 - (void)sortUsingFunction:(NSInteger (NS_NOESCAPE *)(ObjectType,  ObjectType, void * _Nullable))compare context:(nullable void *)context;
 - (void)sortUsingSelector:(SEL)comparator;
 
-/// 在指定索引集合处插入一个数组元素，相当于批次insertObject: atIndex:
 - (void)insertObjects:(NSArray<ObjectType> *)objects atIndexes:(NSIndexSet *)indexes;
 - (void)removeObjectsAtIndexes:(NSIndexSet *)indexes;
-/// 替换对应索引集合位置的元素，相当于批次replaceObjectAtIndex: withObject:
 - (void)replaceObjectsAtIndexes:(NSIndexSet *)indexes withObjects:(NSArray<ObjectType> *)objects;
 
-/// 等效于replaceObjectAtIndex，支持中括号下标格式（array[index]）赋值替换。
-/// index取值范围=[0, count]，index=count时相当于addObject
 - (void)setObject:(ObjectType)obj atIndexedSubscript:(NSUInteger)idx NS_AVAILABLE(10_8, 6_0);
 
 - (void)sortUsingComparator:(NSComparator NS_NOESCAPE)cmptr NS_AVAILABLE(10_6, 4_0);
