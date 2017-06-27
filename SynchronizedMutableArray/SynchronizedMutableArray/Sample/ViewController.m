@@ -32,7 +32,7 @@
     _array1 = [SynchronizedMutableArray array];
     for (NSInteger i = 0; i < 100000; ++i) {
         @autoreleasepool {
-            NSLog(@"%ld, %d, %d", i, __LINE__, [NSThread isMainThread]);
+            NSLog(@"+%ld, %d, %d", i, __LINE__, [NSThread isMainThread]);
             NSNumber *idx = @(i);
             [_array1 addObject:idx];
         }
@@ -42,7 +42,7 @@
     _array2 = [_array1 mutableCopy];
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         [_array2 enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSLog(@"%ld, %d, %d", idx, __LINE__, [NSThread isMainThread]);
+            NSLog(@"%-ld, %d, %d", idx, __LINE__, [NSThread isMainThread]);
             [_array1 removeLastObject];
             
             
@@ -56,18 +56,18 @@
     
     dispatch_async(dispatch_queue_create("123", DISPATCH_QUEUE_CONCURRENT), ^{
         [_array2 enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSLog(@"%ld, %d, %d", idx, __LINE__, [NSThread isMainThread]);
+            NSLog(@"+%ld, %d, %d", idx, __LINE__, [NSThread isMainThread]);
             [_array1 addObject:@(idx)];
             
             
         }];
     });
-    
-//    [_array2 enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//        NSLog(@"%ld, %d, %d", idx, __LINE__, [NSThread isMainThread]);
-//        [_array1 removeLastObject];
-//        
-//    }];
+
+    [_array2 enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSLog(@"-%ld, %d, %d", idx, __LINE__, [NSThread isMainThread]);
+        [_array1 removeLastObject];
+        
+    }];
     
     
 }

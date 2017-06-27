@@ -206,14 +206,23 @@
 
 
 @implementation TreadSafetyQueue
+
+static dispatch_semaphore_t _signal;
+static NSThread *_signalThread;
+
+
++ (void)load {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _signal = dispatch_semaphore_create(1);
+    });
+}
+
+
 - (instancetype)init
 {
     self = [super init];
     if (self) {
-        _dispatchQueue = dispatch_queue_create("com.boobuz.TreadSafetyQueue", DISPATCH_QUEUE_SERIAL);
-        _enumerateQueue = dispatch_queue_create("com.boobuz.TreadSafetyQueue.syncQueue", DISPATCH_QUEUE_SERIAL);
-        _enumerateLockSemaphore = dispatch_semaphore_create(1);
-        _syncLockSemaphore = dispatch_semaphore_create(1);
         _synchronized = NO;
     }
     return self;
@@ -248,37 +257,36 @@
 }
 
 
+- (void)performBlockOnTreadSafetyQueue:(dispatch_block_t)block {
+    if (self.synchronized) {
+        [[self class] performSync:block];
+    }
+}
+
 /// 遍历操作时执行的block，经过各种并发和非并发操作同一数组时，使用dispatch_semaphore是最好的方案
 /// 子线程使用dispatch_semaphore是最安全的，都会等待dispatch_semaphore_signal
 /// 注意：当在主线程中使用dispatch_barrier_sync执行遍历操作，此时子线程也在执行遍历操作时，会造成线程死锁，引发crash
 /// 虽然sync不会开启子线程，但是当其在子线程中执行时，还是会引发线程安全问题crash
-- (void)performBlockOnTreadSafetyQueue:(dispatch_block_t)block {
+- (void)enumerateUsingBlockOnTreadSafetyQueue:(dispatch_block_t)block {
     if (self.synchronized) {
-        if ([[NSThread currentThread] isMainThread]) {
-            block();
-        } else {
-            dispatch_semaphore_wait(_syncLockSemaphore, DISPATCH_TIME_FOREVER);
-            block();
-            dispatch_semaphore_signal(_syncLockSemaphore);
-        }
-    } else {
-        dispatch_barrier_async(_dispatchQueue, block);
+        [[self class] performSync:block];
     }
 }
 
-- (void)enumerateUsingBlockOnTreadSafetyQueue:(dispatch_block_t)block {
-    if (self.synchronized) {
-        if ([[NSThread currentThread] isMainThread]) {
++ (void)performSync:(dispatch_block_t)block {
+    if ([NSThread currentThread] == _signalThread) {
+        block();
+        _signalThread = nil;
+    }else{
+        if ([NSThread isMainThread]) {
             block();
-        } else {
-            dispatch_semaphore_wait(_enumerateLockSemaphore, DISPATCH_TIME_FOREVER);
-            if (block) {
-                block();
-            }
-            dispatch_semaphore_signal(_enumerateLockSemaphore);
+            return;
         }
-    } else {
-        dispatch_barrier_async(_enumerateQueue, block);
+        dispatch_semaphore_wait(_signal, DISPATCH_TIME_FOREVER);
+        _signalThread = [NSThread currentThread];
+        block();
+        //        _signalThread = nil;
+        dispatch_semaphore_signal(_signal);
     }
 }
 
@@ -289,8 +297,6 @@
 }
 
 - (void)dealloc {
-    _dispatchQueue = nil;
-    _enumerateQueue = nil;
     _list = nil;
 }
 
