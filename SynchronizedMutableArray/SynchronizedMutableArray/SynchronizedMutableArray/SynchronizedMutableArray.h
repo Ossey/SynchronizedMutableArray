@@ -12,7 +12,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface TreadSafetyQueue : NSObject {
     id _list;
-    dispatch_queue_t _dispatchQueue;
 }
 
 @property (nonatomic) id list;

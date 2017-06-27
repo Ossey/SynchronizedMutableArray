@@ -260,6 +260,8 @@ static NSThread *_signalThread;
 - (void)performBlockOnTreadSafetyQueue:(dispatch_block_t)block {
     if (self.synchronized) {
         [[self class] performSync:block];
+    } else {
+        block();
     }
 }
 
@@ -270,6 +272,8 @@ static NSThread *_signalThread;
 - (void)enumerateUsingBlockOnTreadSafetyQueue:(dispatch_block_t)block {
     if (self.synchronized) {
         [[self class] performSync:block];
+    } else {
+        block();
     }
 }
 
@@ -289,6 +293,7 @@ static NSThread *_signalThread;
         dispatch_semaphore_signal(_signal);
     }
 }
+
 
 
 
