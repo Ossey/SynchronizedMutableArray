@@ -23,7 +23,6 @@
 
 @implementation SynchronizedMutableArray
 
-
 #pragma mark *** initialize ***
 
 - (instancetype)init
@@ -193,25 +192,21 @@
 @end
 
 
-@implementation TreadSafetyQueue
-
-static dispatch_semaphore_t _signal;
-static NSThread *_signalThread;
-
-
-+ (void)load {
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _signal = dispatch_semaphore_create(1);
-    });
+@interface TreadSafetyQueue () {
+    dispatch_semaphore_t _signal;
+    NSThread *_signalThread;
 }
 
+@end
+
+@implementation TreadSafetyQueue
 
 - (instancetype)init
 {
     self = [super init];
     if (self) {
         _synchronized = NO;
+        _signal = dispatch_semaphore_create(1);
     }
     return self;
 }
@@ -244,10 +239,9 @@ static NSThread *_signalThread;
     }
 }
 
-
 - (void)performBlockOnTreadSafetyQueue:(dispatch_block_t)block {
     if (self.synchronized) {
-        [[self class] performSync:block];
+        [self performSync:block];
     } else {
         block();
     }
@@ -259,16 +253,15 @@ static NSThread *_signalThread;
 /// 虽然sync不会开启子线程，但是当其在子线程中执行时，还是会引发线程安全问题crash
 - (void)enumerateUsingBlockOnTreadSafetyQueue:(dispatch_block_t)block {
     if (self.synchronized) {
-        [[self class] performSync:block];
+        [self performSync:block];
     } else {
         block();
     }
 }
 
-+ (void)performSync:(dispatch_block_t)block {
+- (void)performSync:(dispatch_block_t)block {
     if ([NSThread currentThread] == _signalThread) {
         block();
-        _signalThread = nil;
     }else{
         if ([NSThread isMainThread]) {
             block();
@@ -277,13 +270,10 @@ static NSThread *_signalThread;
         dispatch_semaphore_wait(_signal, DISPATCH_TIME_FOREVER);
         _signalThread = [NSThread currentThread];
         block();
-        //        _signalThread = nil;
+        _signalThread = nil;
         dispatch_semaphore_signal(_signal);
     }
 }
-
-
-
 
 - (NSString *)description {
     return [_list description];
