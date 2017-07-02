@@ -10,7 +10,7 @@
 #import "SynchronizedMutableArray.h"
 
 /*
- * 通过OC的消息转发机制，实现一个同步执行的数组，将SynchronizedMutableArray中未实现的方法转发给NSMutableArray执行，且创建的对象会同步执行
+ * 通过OC的消息转发机制，实现一个同步执行的数组，将SynchronizedMutableArray中未实现的方法转发给NSMutableArray执行，且SynchronizedMutableArray实例的对象会同步执行
  * 目的是为了防止多线程并发操作数组引发的crash，解决线程安全问题
  * 经测试此数组的操作速度是NSMutableArray的60%，非高并发操作，不建议使用
  */
@@ -199,6 +199,14 @@
 
 @end
 
+void *TreadSafetyQueueKey;
+
+@interface TreadSafetyQueue ()
+
+@property (nonatomic, strong) dispatch_queue_t safetyQueue;
+
+@end
+
 @implementation TreadSafetyQueue
 
 - (instancetype)init
@@ -207,6 +215,11 @@
     if (self) {
         _synchronized = NO;
         _signal = dispatch_semaphore_create(1);
+        _safetyQueue = dispatch_queue_create([NSStringFromClass([self class]) UTF8String], NULL);
+        TreadSafetyQueueKey = &TreadSafetyQueueKey;
+        void *nonNullUnusedPointer = (__bridge void *)self;
+        // 给_safetyQueue设置标记
+        dispatch_queue_set_specific(_safetyQueue, TreadSafetyQueueKey, nonNullUnusedPointer, NULL);
     }
     return self;
 }
@@ -241,7 +254,7 @@
 
 - (void)performBlockOnTreadSafetyQueue:(dispatch_block_t)block {
     if (self.synchronized) {
-        [self performSync:block];
+        [self performBlock1:block];
     } else {
         block();
     }
@@ -253,13 +266,14 @@
 /// 虽然sync不会开启子线程，但是当其在子线程中执行时，还是会引发线程安全问题crash
 - (void)enumerateUsingBlockOnTreadSafetyQueue:(dispatch_block_t)block {
     if (self.synchronized) {
-        [self performSync:block];
+        [self performBlock1:block];
     } else {
         block();
     }
 }
 
-- (void)performSync:(dispatch_block_t)block {
+/// 第一种同步方法:
+- (void)performBlock:(dispatch_block_t)block {
     if ([NSThread currentThread] == _signalThread) {
         block();
     }else{
@@ -273,6 +287,17 @@
         _signalThread = nil;
         dispatch_semaphore_signal(_signal);
     }
+    
+}
+
+/// 第二种同步方法:
+- (void)performBlock1:(dispatch_block_t)block {
+    // dispatch_get_specific就是在当前队列中取出标识,如果是在当前队列就执行，非当前队列，就同步执行，防止死锁
+    if (dispatch_get_specific(TreadSafetyQueueKey)) {
+        block();
+    } else {
+        dispatch_sync(_safetyQueue, block);
+    }
 }
 
 - (NSString *)description {
@@ -281,6 +306,9 @@
 
 - (void)dealloc {
     _list = nil;
+    _safetyQueue = NULL;
+    _signal = NULL;
+    _signalThread = nil;
 }
 
 @end
